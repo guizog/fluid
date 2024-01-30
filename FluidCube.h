@@ -19,7 +19,6 @@
 
 class FluidCube {
 public:
-    int size;
     float dt;
     float diff;
     float visc;

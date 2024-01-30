@@ -15,25 +15,25 @@ int IX(int x, int y) {
     return x + (y * N);
 }
 
-void set_bnd(int b, float *x, int n) {
-    for (int j = 1; j < n - 1; j++) {
-        for (int i = 1; i < n - 1; i++) {
+void set_bnd(int b, float *x) {
+    for (int j = 1; j < N - 1; j++) {
+        for (int i = 1; i < N - 1; i++) {
             x[IX(i, j)] = ((b == 3) ? -x[IX(i, j)] : x[IX(i, j)]);
         }
     }
 
     x[IX(0, 0)] = 0.33f * (x[IX(1, 0)] + x[IX(0, 1)]);
-    x[IX(0, n - 1)] = 0.33f * (x[IX(1, n - 1)] + x[IX(0, n - 2)]);
-    x[IX(n - 1, 0)] = 0.33f * (x[IX(n - 2, 0)] + x[IX(n - 1, 1)]);
-    x[IX(n - 1, n - 2)] = 0.33f * (x[IX(n - 2, n - 1)] + x[IX(n - 1, n - 2)]);
+    x[IX(0, N - 1)] = 0.33f * (x[IX(1, N - 1)] + x[IX(0, N - 2)]);
+    x[IX(N - 1, 0)] = 0.33f * (x[IX(N - 2, 0)] + x[IX(N - 1, 1)]);
+    x[IX(N - 1, N - 2)] = 0.33f * (x[IX(N - 2, N - 1)] + x[IX(N - 1, N - 2)]);
 }
 
-void lin_solve(int b, float *x, float *x0, float a, float c, int iter, int n) {
+void lin_solve(int b, float *x, float *x0, float a, float c, int iter) {
     float cRecip = 1.0 / c;
 
     for (int k = 0; k < iter; k++) {
-        for (int j = 1; j < n - 1; j++) {
-            for (int i = 1; i < n - 1; i++) {
+        for (int j = 1; j < N - 1; j++) {
+            for (int i = 1; i < N - 1; i++) {
                 x[IX(i, j)] =
                         (x0[IX(i, j)] +
                          a *
@@ -44,21 +44,21 @@ void lin_solve(int b, float *x, float *x0, float a, float c, int iter, int n) {
                         cRecip;
             }
         }
-        set_bnd(b, x, n);
+        set_bnd(b, x);
     }
     //x[IX(i, j)] =
     //                        (x0[IX(i, j)] + a * (x[IX(i + 1, j)] + x[IX(i - 1, j)] + x[IX(i, j + 1)] + x[IX(i, j - 1)])) *
     //                        cRecip;
 }
 
-void diffuse(int b, float *x, float *x0, float diff, float dt, int iter, int n) {
-    float a = dt * diff * (n - 2) * (n - 2);
-    lin_solve(b, x, x0, a, 1 + 6 * a, iter, n);
+void diffuse(int b, float *x, float *x0, float diff, float dt, int iter) {
+    float a = dt * diff * (N - 2) * (N - 2);
+    lin_solve(b, x, x0, a, 1 + 6 * a, iter);
 }
 
-void project(float *velocX, float *velocY, float *p, float *div, int iter, int n) {
-    for (int j = 1; j < n - 1; j++) {
-        for (int i = 1; i < n - 1; i++) {
+void project(float *velocX, float *velocY, float *p, float *div, int iter) {
+    for (int j = 1; j < N - 1; j++) {
+        for (int i = 1; i < N - 1; i++) {
             div[IX(i, j)] =
                     (-0.5 *
                      (velocX[IX(i + 1, j)] -
@@ -75,37 +75,37 @@ void project(float *velocX, float *velocY, float *p, float *div, int iter, int n
             //        }
         }
     }
-    set_bnd(0, div, n);
-    set_bnd(0, p, n);
-    lin_solve(0, p, div,1, 6, iter, n);
+    set_bnd(0, div);
+    set_bnd(0, p);
+    lin_solve(0, p, div,1, 6, iter);
 
-    for (int j = 1; j < n - 1; j++) {
-        for (int i = 1; i < n - 1; i++) {
+    for (int j = 1; j < N - 1; j++) {
+        for (int i = 1; i < N - 1; i++) {
             velocX[IX(i, j)] -= 0.5 * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) * N;
             velocY[IX(i, j)] -= 0.5 * (p[IX(i, j + 1)] - p[IX(i, j - 1)]) * N;
             //velocX[IX(i, j)] -= 0.5f * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) * n;
             //            velocY[IX(i, j)] -= 0.5f * (p[IX(i, j + 1)] - p[IX(i, j - 1)]) * n;
         }
     }
-    set_bnd(1, velocX, n);
-    set_bnd(2, velocY, n);
+    set_bnd(1, velocX);
+    set_bnd(2, velocY);
 }
 
-void advect(int b, float *d, float *d0, float *velocX, float *velocY, float dt, int n) {
+void advect(int b, float *d, float *d0, float *velocX, float *velocY, float dt) {
     float i0, i1, j0, j1;
 
-    float dtx = dt * (n - 2);
-    float dty = dt * (n - 2);
+    float dtx = dt * (N - 2);
+    float dty = dt * (N - 2);
 
     float s0, s1, t0, t1;
     float tmp1, tmp2, x, y;
 
-    float nfloat = n;
+    float nfloat = N;
     float ifloat, jfloat;
     int i, j;
 
-    for (j = 1, jfloat = 1; j < n - 1; j++, jfloat++) {
-        for (i = 1, ifloat = 1; i < n - 2; i++, ifloat++) {
+    for (j = 1, jfloat = 1; j < N - 1; j++, jfloat++) {
+        for (i = 1, ifloat = 1; i < N - 2; i++, ifloat++) {
             tmp1 = dtx * velocX[IX(i, j)];
             tmp2 = dty * velocY[IX(i, j)];
             x = ifloat - tmp1;
@@ -147,14 +147,12 @@ void advect(int b, float *d, float *d0, float *velocX, float *velocY, float dt, 
 
         }
     }
-    set_bnd(b, d, n);
+    set_bnd(b, d);
 }
 
 
 FluidCube::FluidCube(int diffusion, int viscosity, float dt) {
-    this->size = N;
     this->dt = dt;
-
     this->diff = diffusion;
     this->visc = viscosity;
     memset(this->density, 0, (N * N) * sizeof(*density));
@@ -170,38 +168,25 @@ void FluidCube::AddDensity(int x, int y, float amount) {
 }
 
 void FluidCube::AddVelocity(int x, int y, float amountx, float amounty) {
-    int index = IX(x, y);
-
     this->Vx[IX(x, y)] += amountx;
     this->Vy[IX(x, y)] += amounty;
 }
 
 void FluidCube::Step() {
-    int n = this->size;
-    float visc = this->visc;
-    float diff = this->diff;
-    float dt = this->dt;
-    float *Vx = this->Vx;
-    float *Vy = this->Vy;
-    float *Vx0 = this->Vx0;
-    float *Vy0 = this->Vy0;
-    float *s = this->s;
-    float *density = this->density;
-
     std::cout << "step" << std::endl;
 
-    diffuse(1, Vx0, Vx, visc, dt, 4, n);
-    diffuse(2, Vy0, Vy, visc, dt, 4, n);
+    diffuse(1, this->Vx0, this->Vx, this->visc, this->dt, 4);
+    diffuse(2, this->Vy0, this->Vy, this->visc, this->dt, 4);
 
-    project(Vx0, Vy0, Vx, Vy, 4, n);
+    project(this->Vx0, this->Vy0, this->Vx, this->Vy, 4);
 
-    advect(1, Vx, Vx0, Vx0, Vy0, dt, n);
-    advect(2, Vy, Vy0, Vx0, Vy0, dt, n);
+    advect(1, this->Vx, this->Vx0, this->Vx0, this->Vy0, this->dt);
+    advect(2, this->Vy, this->Vy0, this->Vx0, this->Vy0, this->dt);
 
-    project(Vx, Vy, Vx0, Vy0, 4, n);
+    project(this->Vx, this->Vy, this->Vx0, this->Vy0, 4);
 
-    diffuse(0, s, density, diff, dt, 4, n);
-    advect(0, density, s, Vx, Vy, dt, n);
+    diffuse(0, this->s, this->density, this->diff, this->dt, 4);
+    advect(0, this->density, this->s, this->Vx, this->Vy, this->dt);
 
 }
 
