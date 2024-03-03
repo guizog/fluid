@@ -87,3 +87,6 @@ cmake-build-debug-mingw/.cmake/api/v1/query/toolchains-v1
 cmake-build-debug-mingw/.cmake/api/v1/query/codemodel-v2
 cmake-build-debug-mingw/.cmake/api/v1/query/cmakeFiles-v1
 cmake-build-debug-mingw/.cmake/api/v1/query/cache-v2
+cmake-build-debug-visual-studio/.cmake/api/v1/reply/cache-v2-b0b37ffaaee27037c25f.json
+cmake-build-debug-visual-studio/.cmake/api/v1/reply/cmakeFiles-v1-a1014379d72dfdb97261.json
+cmake-build-debug-visual-studio/.cmake/api/v1/reply/index-2024-02-26T00-25-07-0619.json

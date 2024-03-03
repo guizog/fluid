@@ -46,10 +46,8 @@ void lin_solve(int b, float *x, float *x0, float a, float c, int iter) {
         }
         set_bnd(b, x);
     }
-    //x[IX(i, j)] =
-    //                        (x0[IX(i, j)] + a * (x[IX(i + 1, j)] + x[IX(i - 1, j)] + x[IX(i, j + 1)] + x[IX(i, j - 1)])) *
-    //                        cRecip;
 }
+
 
 void diffuse(int b, float *x, float *x0, float diff, float dt, int iter) {
     float a = dt * diff * (N - 2) * (N - 2);
@@ -67,12 +65,6 @@ void project(float *velocX, float *velocY, float *p, float *div, int iter) {
                       velocY[IX(i, j - 1)])) /
                     N;
             p[IX(i, j)] = 0;
-
-            //{
-            //            div[IX(i, j)] = -0.5f * (velocX[IX(i + 1, j)] - velocX[IX(i - 1, j)] + velocY[IX(i, j + 1)] -
-            //                                     velocY[IX(i, j - 1)]) / n;
-            //            p[IX(i, j)] = 0;
-            //        }
         }
     }
     set_bnd(0, div);
@@ -83,8 +75,6 @@ void project(float *velocX, float *velocY, float *p, float *div, int iter) {
         for (int i = 1; i < N - 1; i++) {
             velocX[IX(i, j)] -= 0.5 * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) * N;
             velocY[IX(i, j)] -= 0.5 * (p[IX(i, j + 1)] - p[IX(i, j - 1)]) * N;
-            //velocX[IX(i, j)] -= 0.5f * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) * n;
-            //            velocY[IX(i, j)] -= 0.5f * (p[IX(i, j + 1)] - p[IX(i, j - 1)]) * n;
         }
     }
     set_bnd(1, velocX);
@@ -92,6 +82,8 @@ void project(float *velocX, float *velocY, float *p, float *div, int iter) {
 }
 
 void advect(int b, float *d, float *d0, float *velocX, float *velocY, float dt) {
+    // function imbued by black magic
+
     float i0, i1, j0, j1;
 
     float dtx = dt * (N - 2);
@@ -138,13 +130,6 @@ void advect(int b, float *d, float *d0, float *velocX, float *velocY, float dt) 
             d[IX(i, j)] =
                     s0 * (t0 * d0[IX(i0i, j0i)] + t1 * d0[IX(i0i, j1i)]) +
                     s1 * (t0 * d0[IX(i1i, j0i)] + t1 * d0[IX(i1i, j1i)]);
-
-            //d[IX(i, j)] = s0 * (t0 * d0[IX(i0i, j0i)]
-            //                                + (t1 * d0[IX(i0i, j1i)]))
-            //                          + s1 * (t0 * d0[IX(i1i, j0i)]
-            //                                  + (t1 * d0[IX(i1i, j1i)]
-            //                                  ));
-
         }
     }
     set_bnd(b, d);
@@ -173,8 +158,6 @@ void FluidCube::AddVelocity(int x, int y, float amountx, float amounty) {
 }
 
 void FluidCube::Step() {
-    std::cout << "step" << std::endl;
-
     diffuse(1, this->Vx0, this->Vx, this->visc, this->dt, 4);
     diffuse(2, this->Vy0, this->Vy, this->visc, this->dt, 4);
 
@@ -211,7 +194,6 @@ void FluidCube::Render(){
 
         }
     }
-    std::cout << "#### render" << std::endl;
 }
 
 
