@@ -44,31 +44,6 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
     }
 }
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-{
-
-}
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)//did not work as expected lol
-{
-    if(action == GLFW_PRESS){
-        if(key == GLFW_KEY_UP){
-            densAmount += 100;
-            std::cout << "density increased to " << densAmount << std::endl;
-        }
-        if(key == GLFW_KEY_DOWN){
-            densAmount -= 100;
-            std::cout << "density decreased to " << densAmount << std::endl;
-        }
-        if(key == GLFW_KEY_LEFT){
-            amountY += 5000;
-        }
-        if(key == GLFW_KEY_RIGHT){
-            amountY -= 5000;
-        }
-
-    }
-}
 
 int main() {
 
